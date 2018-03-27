@@ -74,6 +74,20 @@
             }
     register: service_dialog
 
+  - name: Wait for container templates to populate 
+    uri:
+      url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/container_templates"
+      method: GET
+      user: "{{ miq_username }}"
+      password: "{{ miq_password }}"
+      validate_certs: no
+      headers:
+        Accept: application/json
+    register: container_templates
+    retries: 60
+    delay: 5
+    until: container_templates.json.count >= 9
+
   - uri:
       url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/service_templates"
       method: POST
