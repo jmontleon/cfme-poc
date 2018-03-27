@@ -1,0 +1,4 @@
+FROM docker.io/manageiq/manageiq-ui-worker:latest
+COPY container_manager.rb /opt/rubies/ruby-2.3.1/lib/ruby/gems/2.3.0/bundler/gems/manageiq-providers-openshift-2611d12b5ee5/app/models/manageiq/providers/openshift/container_manager.rb
+COPY service_templates_controller.rb /opt/rubies/ruby-2.3.1/lib/ruby/gems/2.3.0/bundler/gems/manageiq-api-73c1ba8a6b42/app/controllers/api/service_templates_controller.rb
+USER root

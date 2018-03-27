@@ -1,0 +1,101 @@
+- hosts: localhost
+  vars:
+    openshift_ip: "172.17.0.1"
+    openshift_hostname: "{{ openshift_ip }}.nip.io"
+    miq_namespace: "miq"
+    miq_username: "admin"
+    miq_password: "smartvm"
+  tasks:
+  - shell: "oc whoami"
+    register: whoami
+
+  - shell: "oc login -u admin -p admin"
+
+  - shell: "oc whoami -t"
+    register: token
+
+  - shell: "oc login -u {{ whoami.stdout }}"
+
+  - uri: 
+      url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/providers"
+      method: POST
+      user: "{{ miq_username }}"
+      password: "{{ miq_password }}"
+      validate_certs: no
+      body_format: json
+      headers:
+        Accept: application/json
+      body: |
+            {
+              "name": "Openshift",
+              "type": "ManageIQ::Providers::Openshift::ContainerManager",
+              "zone_id": 1,
+              "connection_configurations": [{
+                "endpoint": {
+                  "role": "default",
+                  "hostname": "{{ openshift_ip }}",
+                  "port": "8443",
+                  "security_protocol": "ssl-without-validation"
+                },
+                "authentication": {
+                  "role": "bearer",
+                  "auth_key": "{{ token.stdout }}"
+                }
+              }]
+            }
+
+  - uri:
+      url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/service_dialogs"
+      method: POST
+      user: "{{ miq_username }}"
+      password: "{{ miq_password }}"
+      validate_certs: no
+      body_format: json
+      headers:
+        Accept: application/json
+      body: |
+            {
+              "description": "Test",
+              "label": "Test",
+              "dialog_tabs": [{
+                "description": "Test",
+                "position": 0,
+                "label": "Test",
+                "dialog_groups": [{
+                  "description": "Test",
+                  "label": "Test",
+                  "dialog_fields": [{
+                    "name": "Test",
+                    "label": "Test",
+                    "type": "DialogFieldCheckBox"
+                  }]
+                }]
+              }]
+            }
+    register: service_dialog
+
+  - uri:
+      url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/service_templates"
+      method: POST
+      user: "{{ miq_username }}"
+      password: "{{ miq_password }}"
+      validate_certs: no
+      body_format: json
+      headers:
+        Accept: application/json
+      body: |
+            {
+              "name":"Test",
+              "description":"Test",
+              "type":"ServiceTemplateContainerTemplate",
+              "service_template_id":null,
+              "service_type":"atomic",
+              "prov_type":"generic_container_template",
+              "config_info": {
+                "provision": {
+                  "container_template_id":"1000000000008",
+                  "dialog_id": "{{ service_dialog.json.results.0.id }}",
+                  "fqname":"/Service/Generic/StateMachines/GenericLifecycle/provision"
+                }
+              }
+            }
