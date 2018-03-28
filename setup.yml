@@ -6,17 +6,27 @@
     miq_username: "admin"
     miq_password: "smartvm"
   tasks:
-  - shell: "oc whoami"
+  - name: oc whoami to get current login
+    shell: "oc whoami"
     register: whoami
 
-  - shell: "oc login -u admin -p admin"
+  - name: oc login as admin
+    shell: "oc login -u admin -p admin"
 
-  - shell: "oc whoami -t"
+  - name: oc whoami -t to get token
+    shell: "oc whoami -t"
     register: token
 
-  - shell: "oc login -u {{ whoami.stdout }}"
+  - name: oc login as original login again
+    shell: "oc login -u {{ whoami.stdout }}"
 
-  - uri: 
+  - name: oc patch ui dc to workaround api bugs
+    shell: |
+           oc patch -n {{ miq_namespace }} dc/ui --patch '
+           { "spec": { "template": { "spec": { "containers": [{ "name": "ui", "image": "jmontleon/manageiq-ui-worker:latest" }]}}}}'
+
+  - name: add cloud provider (This will retry until the patched pod comes up)
+    uri:
       url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/providers"
       method: POST
       user: "{{ miq_username }}"
@@ -43,8 +53,13 @@
                 }
               }]
             }
+    register: result
+    retries: 60
+    delay: 5
+    until: result.status == 200
 
-  - uri:
+  - name: add service dialog
+    uri:
       url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/service_dialogs"
       method: POST
       user: "{{ miq_username }}"
@@ -74,7 +89,7 @@
             }
     register: service_dialog
 
-  - name: Wait for container templates to populate 
+  - name: wait for container templates to populate.
     uri:
       url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/container_templates"
       method: GET
@@ -88,7 +103,8 @@
     delay: 5
     until: container_templates.json.count >= 9
 
-  - uri:
+  - name: add service template
+    uri:
       url: "https://manageiq-{{ miq_namespace }}.{{ openshift_hostname }}/api/service_templates"
       method: POST
       user: "{{ miq_username }}"

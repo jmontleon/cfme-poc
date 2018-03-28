@@ -9,13 +9,12 @@ Testing:
 ========
 1. Setup openshift origin with the automation broker. One option is [catasb](https://github.com/fusor/catasb).
 1. Once openshift and the Broker are running launch the ManageIQ APB. Take care to carry out the instructions in the description. The APB will take about 5 minutes to run. The app container will take about an additional 5 minutes to create the remaining deployment configs.
-1. Short term workaround: Once the ui dc is created (towards the end) edit it and change the image to docker.io/jmontleon/manageiq-ui-worker:latest. 
 1. Edit the vars in `setup.yml` to match your Openshift and MIQ instances. Then run `ansible-playbook setup.yml` to configure your Openshift instance as a Cloud Provider and create a service dialog and service template.
 1. It should then be possible to run the included ruby script, for example: `./service_template_to_apb.rb -u admin -p smartvm -s https://manageiq-miq1.172.17.0.1.nip.io -n -r https://manageiq-miq1.172.17.0.1.nip.io/api/service_templates/1000000000001`
 
 Workarounds:
 ============
-Dockerfile.manageiq-ui-worker, service_templates_controller.rb, and container_manager.rb were used to create docker.io/jmontleon/manageiq-ui-worker:latest from docker.io/manageiq/manageiq-ui-worker:latest to enable using the included ansible playbook to set up objects for a test environment.
+Dockerfile.manageiq-ui-worker, service_templates_controller.rb, and container_manager.rb were used to create docker.io/jmontleon/manageiq-ui-worker:latest from docker.io/manageiq/manageiq-ui-worker:latest. This image fixes a couple API bugs in order to enable using the included ansible playbook to set up objects for a test environment. When the setup.yml playbook is run it will patch the UI deployment and retry adding the container provider until the new pod is up, which will allow it to work.
 
 Associated Issues:
 * [ManageIQ Openshift Provider #93](https://github.com/ManageIQ/manageiq-providers-openshift/issues/93)
