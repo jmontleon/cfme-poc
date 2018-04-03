@@ -129,3 +129,8 @@
                 }
               }
             }
+
+  - name: oc patch asb dc to use PoC Broker
+    shell: |
+           oc patch -n ansibleservicebroker dc/asb --patch '
+           { "spec": { "template": { "spec": { "containers": [{ "name": "asb", "image": "docker.io/jmontleon/origin-ansible-service-broker:latest" }]}}}}'
