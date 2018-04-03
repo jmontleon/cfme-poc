@@ -11,6 +11,19 @@ Testing:
 1. Once openshift and the Broker are running launch the ManageIQ APB. Take care to carry out the instructions in the description. The APB will take about 5 minutes to run. The app container will take about an additional 5 minutes to create the remaining deployment configs.
 1. Edit the vars in `setup.yml` to match your Openshift and MIQ instances. Then run `ansible-playbook setup.yml` to configure your Openshift instance as a Cloud Provider and create a service dialog and service template.
 1. It should then be possible to run the included ruby script, for example: `./service_template_to_apb.rb -u admin -p smartvm -s https://manageiq-miq1.172.17.0.1.nip.io -n -r https://manageiq-miq1.172.17.0.1.nip.io/api/service_templates/1000000000001`
+1.  `oc edit configmap -n ansible-service-broker broker-config`
+    Add a registry, i.e:
+    ```
+      - type: "cfme"
+        name: "miq"
+        url: "https://manageiq-miq.172.17.0.1.nip.io"
+        org: "ansibleplaybookbundle"
+        user: "admin"
+        pass: "smartvm"
+        white_list:
+          - ".*$"
+    ```
+1. `oc edit dc -n ansible-service-broker asb` and change the image to `docker.io/jmontleon/origin-ansible-service-broker:latest`
 
 Workarounds:
 ============
@@ -22,4 +35,4 @@ Associated Issues:
 
 Todo:
 =====
-Create a Proof of Concept CFME Registry Adapter in [Automation Broker](https://github.com/openshift/ansible-service-broker). 
+Improve CFME Registry Adapter in [Automation Broker](https://github.com/openshift/ansible-service-broker/pull/864)/[bundle-lib](https://github.com/automationbroker/bundle-lib)
