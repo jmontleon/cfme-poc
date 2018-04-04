@@ -34,5 +34,5 @@ Associated Issues:
 
 Todo:
 =====
-Improve CFME Registry Adapter in [Automation Broker](https://github.com/openshift/ansible-service-broker/pull/864)/[bundle-lib](https://github.com/automationbroker/bundle-lib)
-Automate patching configmap in setup.yml
+* Improve CFME Registry Adapter in [Automation Broker](https://github.com/openshift/ansible-service-broker/pull/864)/[bundle-lib](https://github.com/automationbroker/bundle-lib)
+* Automate patching configmap in setup.yml
