@@ -70,18 +70,18 @@
         Accept: application/json
       body: |
             {
-              "description": "Test",
-              "label": "Test",
+              "description": "Test Dialog",
+              "label": "TestDialog",
               "dialog_tabs": [{
-                "description": "Test",
+                "description": "Test Tab",
                 "position": 0,
-                "label": "Test",
+                "label": "TestTab",
                 "dialog_groups": [{
-                  "description": "Test",
-                  "label": "Test",
+                  "description": "Test Group",
+                  "label": "TestGroup",
                   "dialog_fields": [{
-                    "name": "Test",
-                    "label": "Test",
+                    "name": "TestField",
+                    "label": "TestField",
                     "type": "DialogFieldCheckBox"
                   }]
                 }]
