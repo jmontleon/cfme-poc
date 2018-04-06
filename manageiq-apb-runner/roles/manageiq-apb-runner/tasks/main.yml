@@ -1,0 +1,34 @@
+- name: Receive json map from parameter
+  set_fact:
+    map: "{{ data_map | from_json }}"
+
+- debug:
+    msg: "{{ item }}"
+  with_items: "{{ map.cfme_params }}"
+
+- name: Fix Enum values
+  include_tasks: fix_enum_values.yml
+  with_items: "{{ map.cfme_params }}"
+
+- set_fact:
+    cfme_json: ""
+
+- name: Create parameter string to send to CFME
+  set_fact:
+    cfme_json: '{{ cfme_json }}, "{{ item }}": "{{ vars[item] }}"'
+  with_items: "{{ map.cfme_params }}" 
+  when: vars[item] is defined and vars[item]
+
+- name: Send request
+  uri:
+    url: "{{ cfme_url }}/api/service_templates"
+    method: POST
+    validate_certs: no
+    user: "{{ cfme_user }}"
+    password: "{{ cfme_password }}"
+    body_format: json
+    body: |
+          { "action": "order",
+            "resource": {
+              "href" : "{{ cfme_url }}/api/service_templates/{{ map.template_id }}" {{ cfme_json }} }
+          }
