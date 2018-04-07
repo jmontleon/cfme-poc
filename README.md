@@ -12,14 +12,14 @@ Testing:
 1.  `oc edit configmap -n ansible-service-broker broker-config`
     Add a registry, i.e:
     ```
-      - type: "cfme"
-        name: "miq"
-        url: "https://manageiq-miq.172.17.0.1.nip.io"
-        org: "ansibleplaybookbundle"
-        user: "admin"
-        pass: "smartvm"
-        white_list:
-          - ".*$"
+          - type: "cfme"
+            name: "miq"
+            url: "https://manageiq-miq.172.17.0.1.nip.io"
+            org: "ansibleplaybookbundle"
+            user: "admin"
+            pass: "smartvm"
+            white_list:
+              - ".*$"
     ```
 1. Edit the vars in `setup.yml` to match your Openshift and MIQ instances. Then run `ansible-playbook setup.yml` to configure your Openshift instance as a Cloud Provider and create a service dialog and service template. You should also see a `Test (APB)` in the Openshift UI after the Service Catalog relists.
 1. It should then be possible to run the included ruby script, for example: `./service_template_to_apb.rb -u admin -p smartvm -s https://manageiq-miq1.172.17.0.1.nip.io -n -r https://manageiq-miq1.172.17.0.1.nip.io/api/service_templates/1000000000001`
