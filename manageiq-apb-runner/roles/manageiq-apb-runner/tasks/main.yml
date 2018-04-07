@@ -19,16 +19,39 @@
   with_items: "{{ map.cfme_params }}" 
   when: vars[item] is defined and vars[item]
 
-- name: Send request
-  uri:
+- name: Set initial service template url
+  set_fact:
     url: "{{ cfme_url }}/api/service_templates"
-    method: POST
-    validate_certs: no
-    user: "{{ cfme_user }}"
-    password: "{{ cfme_password }}"
-    body_format: json
+
+- name: Update service template url
+  set_fact:
+    url: "{{ cfme_url }}/api/service_catalogs/{{ map.catalog_id }}/service_templates"
+  when: map.catalog_id is defined
+
+- name: Set initial request body
+  set_fact:
     body: |
           { "action": "order",
             "resource": {
               "href" : "{{ cfme_url }}/api/service_templates/{{ map.template_id }}" {{ cfme_json }} }
           }
+
+- name: Update request body
+  set_fact:
+    body: |
+          { "action": "order",
+            "resource": {
+              "href" : "{{ cfme_url }}/api/service_templates/{{ map.template_id }}" {{ cfme_json }},
+              "existing_project_name": "{{ namespace }}" }
+          }
+  when: map.type == "ServiceTemplateContainerTemplate"
+
+- name: Send request
+  uri:
+    url: "{{ url }}"
+    method: POST
+    validate_certs: no
+    user: "{{ cfme_user }}"
+    password: "{{ cfme_password }}"
+    body_format: json
+    body: "{{ body }}"
