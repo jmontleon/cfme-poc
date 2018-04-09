@@ -2,31 +2,36 @@
   set_fact:
     map: "{{ data_map | from_json }}"
 
-- debug:
-    msg: "{{ item }}"
-  with_items: "{{ map.cfme_params }}"
+- name: Create parameter string to send to CFME
+  set_fact:
+    cfme_json: ""
 
-- name: Fix Enum values
+- name: Update parameter string with boolean values
+  set_fact:
+    cfme_json: '{{ cfme_json }}, "{{ item }}": "t"'
+  with_items: "{{ map.cfme_params }}"
+  when:
+  - vars[item] is defined
+  - vars[item] | bool
+  - vars[item]
+
+- name: Update parameter string with enum values
   include_tasks: fix_enum_values.yml
   with_items: "{{ map.cfme_params }}"
 
-- set_fact:
-    cfme_json: ""
-
-- name: Create parameter string to send to CFME
+- name: Update parameter string with all other values
   set_fact:
     cfme_json: '{{ cfme_json }}, "{{ item }}": "{{ vars[item] }}"'
-  with_items: "{{ map.cfme_params }}" 
-  when: vars[item] is defined and vars[item]
+  with_items: "{{ map.cfme_params }}"
+  when:
+  - vars[item] is defined
+  - not(vars[item] | bool)
+  - not(vars['map'][item] is defined)
+  - vars[item]
 
-- name: Set initial service template url
-  set_fact:
-    url: "{{ cfme_url }}/api/service_templates"
-
-- name: Update service template url
+- name: Set service template url
   set_fact:
     url: "{{ cfme_url }}/api/service_catalogs/{{ map.catalog_id }}/service_templates"
-  when: map.catalog_id is defined
 
 - name: Set initial request body
   set_fact:
@@ -45,6 +50,10 @@
               "existing_project_name": "{{ namespace }}" }
           }
   when: map.type == "ServiceTemplateContainerTemplate"
+
+# Helpful for debugging failed requests.
+- debug:
+    msg: "{{ body }}"
 
 - name: Send request
   uri:
