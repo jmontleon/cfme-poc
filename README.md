@@ -32,8 +32,8 @@ Associated Issues:
 * [ManageIQ Openshift Provider #93](https://github.com/ManageIQ/manageiq-providers-openshift/issues/93)
 * [ManageIQ #17211](https://github.com/ManageIQ/manageiq/issues/17211)
 
-Todo:
-=====
-* Improve CFME Registry Adapter in the Automation Broker [PoC PR](https://github.com/openshift/ansible-service-broker/pull/864) / [bundle-lib](https://github.com/automationbroker/bundle-lib)
-* Automate patching configmap in setup.yml
-* Create a CFME Runner APB capable of processing parameters and generating a request.
+Links:
+======
+[Automation Broker Registry Adapter PoC](https://github.com/openshift/ansible-service-broker/tree/cfme-poc)
+[manageiq-runner-apb PoC](https://github.com/ansibleplaybookbundle/manageiq-runner-apb)
+[Youtube Demo](https://www.youtube.com/watch?v=bzwIbP9Uxsg)
